@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm Phân Phối Chuẩn - GS. Đặng Vũ Hiệp</title>
+    <!-- MathJax để hiển thị công thức toán -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header h2 {
+            font-size: 1.3em;
+            font-weight: 400;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        .header .author {
+            margin-top: 15px;
+            font-size: 1.1em;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 15px;
+        }
+
+        .info-bar {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .score {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .score span {
+            color: #6e48aa;
+            font-size: 1.5em;
+            margin-left: 5px;
+        }
+
+        .progress {
+            flex: 1;
+            margin: 0 30px;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6e48aa, #9d50bb);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .timer {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #495057;
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 25px;
+        }
+
+        .timer i {
+            margin-right: 5px;
+            color: #6e48aa;
+        }
+
+        .questions-container {
+            padding: 30px;
+        }
+
+        .question-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            border-color: #6e48aa;
+            box-shadow: 0 5px 20px rgba(110, 72, 170, 0.1);
+        }
+
+        .question-card.answered {
+            border-left: 5px solid #6e48aa;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: #6e48aa;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #212529;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            border-color: #6e48aa;
+        }
+
+        .option.selected {
+            background: #6e48aa;
+            color: white;
+            border-color: #6e48aa;
+        }
+
+        .option.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct-feedback {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback.incorrect-feedback {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+            font-style: italic;
+        }
+
+        .actions {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid #e9ecef;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6e48aa, #9d50bb);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(110, 72, 170, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .result-content h3 {
+            font-size: 2em;
+            color: #6e48aa;
+            margin-bottom: 20px;
+        }
+
+        .result-score {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: #28a745;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 1.2em;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        .formula-reference {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.95em;
+            border-left: 4px solid #6e48aa;
+        }
+
+        .formula-reference h4 {
+            color: #6e48aa;
+            margin-bottom: 10px;
+        }
+
+        .formula-reference p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .progress {
+                margin: 15px 0;
+                width: 100%;
+            }
+        }
+
+        .mjx-chtml {
+            text-align: left !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PHÂN PHỐI CHUẨN (NORMAL DISTRIBUTION)</h1>
+            <h2>Bài kiểm tra trắc nghiệm tương tác</h2>
+            <div class="author">GS. Đặng Vũ Hiệp - Giảng viên Toán học</div>
+        </div>
+
+        <div class="info-bar">
+            <div class="score">Điểm số: <span id="score">0</span>/<span id="total-questions">15</span></div>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="timer">
+                <i>⏱️</i> <span id="timer">30:00</span>
+            </div>
+        </div>
+
+        <div class="formula-reference">
+            <h4>Công thức tham khảo:</h4>
+            <p>• Hàm mật độ: \(f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}(\frac{x-\mu}{\sigma})^2}\)</p>
+            <p>• Chuẩn hóa: \(Z = \frac{X - \mu}{\sigma} \sim \mathcal{N}(0,1)\)</p>
+            <p>• Quy tắc 68-95-99.7: \(\mathbb{P}(|X-\mu| < \sigma) \approx 0.6827\), \(\mathbb{P}(|X-\mu| < 2\sigma) \approx 0.9545\), \(\mathbb{P}(|X-\mu| < 3\sigma) \approx 0.9973\)</p>
+            <p>• Biến đổi tuyến tính: \(aX + b \sim \mathcal{N}(a\mu + b, a^2\sigma^2)\)</p>
+        </div>
+
+        <div class="questions-container" id="questions-container">
+            <!-- Câu hỏi sẽ được tạo bằng JavaScript -->
+        </div>
+
+        <div class="actions">
+            <button class="btn-secondary" onclick="resetQuiz()">🔄 Làm lại</button>
+            <button class="btn-primary" onclick="checkAllAnswers()">📝 Nộp bài</button>
+            <button class="btn-success" onclick="showAnswers()">🔍 Xem đáp án</button>
+        </div>
+    </div>
+
+    <div class="result-modal" id="result-modal">
+        <div class="result-content">
+            <h3>KẾT QUẢ BÀI THI</h3>
+            <div class="result-score" id="result-score">0/15</div>
+            <div class="result-message" id="result-message"></div>
+            <button class="btn-primary" onclick="closeResult()">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        // Định nghĩa câu hỏi - SỬ DỤNG ĐÚNG CÚ PHÁP MATHJAX
+        const questions = [
+            {
+                question: "Cho \\(X \\sim \\mathcal{N}(\\mu, \\sigma^2)\\). Hàm mật độ xác suất của X là:",
+                options: [
+                    "A. \\(f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}\\)",
+                    "B. \\(f(x) = \\frac{1}{\\sqrt{2\\pi}} e^{-\\frac{(x-\\mu)^2}{2}}\\)",
+                    "C. \\(f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{(x-\\mu)^2}{\\sigma^2}}\\)",
+                    "D. \\(f(x) = \\frac{1}{\\sigma\\sqrt{2}} e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}\\)"
+                ],
+                correct: 0,
+                explanation: "Công thức chính xác là \\(f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}\\). Đây là hàm mật độ của phân phối chuẩn với kỳ vọng \\(\\mu\\) và phương sai \\(\\sigma^2\\)."
+            },
+            {
+                question: "Nếu \\(Z \\sim \\mathcal{N}(0,1)\\) thì giá trị của \\(P(Z < 1.96)\\) xấp xỉ bằng:",
+                options: [
+                    "A. 0.9500",
+                    "B. 0.9750", 
+                    "C. 0.0250",
+                    "D. 0.0500"
+                ],
+                correct: 1,
+                explanation: "Từ bảng phân phối chuẩn tắc, \\(\\Phi(1.96) \\approx 0.9750\\). Đây là giá trị thường dùng trong khoảng tin cậy 95%."
+            },
+            {
+                question: "Cho \\(X \\sim \\mathcal{N}(10,4)\\). Giá trị của \\(P(X > 12)\\) là:",
+                options: [
+                    "A. 0.1587",
+                    "B. 0.8413",
+                    "C. 0.0228",
+                    "D. 0.9772"
+                ],
+                correct: 0,
+                explanation: "Chuẩn hóa: \\(Z = \\frac{12-10}{2} = 1\\). \\(P(X > 12) = P(Z > 1) = 1 - \\Phi(1) \\approx 1 - 0.8413 = 0.1587\\)."
+            },
+            {
+                question: "Theo quy tắc 68-95-99.7, xác suất để một biến ngẫu nhiên chuẩn nằm trong khoảng \\((\\mu - 2\\sigma, \\mu + 2\\sigma)\\) xấp xỉ:",
+                options: [
+                    "A. 68.27%",
+                    "B. 95.45%",
+                    "C. 99.73%",
+                    "D. 50%"
+                ],
+                correct: 1,
+                explanation: "Quy tắc thực nghiệm: khoảng \\(\\mu \\pm \\sigma\\) chứa 68.27%, \\(\\mu \\pm 2\\sigma\\) chứa 95.45%, \\(\\mu \\pm 3\\sigma\\) chứa 99.73% dữ liệu."
+            },
+            {
+                question: "Nếu \\(X \\sim \\mathcal{N}(5,9)\\) thì phân phối của \\(Y = 2X + 1\\) là:",
+                options: [
+                    "A. \\(\\mathcal{N}(10,18)\\)",
+                    "B. \\(\\mathcal{N}(11,18)\\)",
+                    "C. \\(\\mathcal{N}(11,36)\\)",
+                    "D. \\(\\mathcal{N}(10,36)\\)"
+                ],
+                correct: 2,
+                explanation: "Với phép biến đổi tuyến tính: \\(\\mathbb{E}[Y] = 2\\times5 + 1 = 11\\), \\(\\mathrm{Var}(Y) = 2^2 \\times 9 = 36\\). Vậy \\(Y \\sim \\mathcal{N}(11,36)\\)."
+            },
+            {
+                question: "Phân phối chuẩn tắc \\(\\mathcal{N}(0,1)\\) có:",
+                options: [
+                    "A. Kỳ vọng bằng 1, phương sai bằng 0",
+                    "B. Kỳ vọng bằng 0, phương sai bằng 1",
+                    "C. Kỳ vọng bằng 0, phương sai bằng 0",
+                    "D. Kỳ vọng bằng 1, phương sai bằng 1"
+                ],
+                correct: 1,
+                explanation: "Phân phối chuẩn tắc là trường hợp đặc biệt với \\(\\mu = 0\\) và \\(\\sigma^2 = 1\\)."
+            },
+            {
+                question: "Cho \\(X \\sim \\mathcal{N}(\\mu, \\sigma^2)\\). Hằng số cần nhân với \\(X-\\mu\\) để được phân phối chuẩn tắc là:",
+                options: [
+                    "A. \\(\\sigma\\)",
+                    "B. \\(\\frac{1}{\\sigma}\\)",
+                    "C. \\(\\sigma^2\\)",
+                    "D. \\(\\frac{1}{\\sigma^2}\\)"
+                ],
+                correct: 1,
+                explanation: "Công thức chuẩn hóa: \\(Z = \\frac{X-\\mu}{\\sigma}\\). Vậy cần nhân với \\(\\frac{1}{\\sigma}\\)."
+            },
+            {
+                question: "Trong phân phối chuẩn, điểm uốn của đồ thị hàm mật độ nằm tại:",
+                options: [
+                    "A. \\(x = \\mu\\)",
+                    "B. \\(x = \\mu \\pm \\frac{\\sigma}{2}\\)",
+                    "C. \\(x = \\mu \\pm \\sigma\\)",
+                    "D. \\(x = \\mu \\pm 2\\sigma\\)"
+                ],
+                correct: 2,
+                explanation: "Điểm uốn của đường cong mật độ chuẩn nằm tại \\(x = \\mu \\pm \\sigma\\). Đây là nơi đồ thị chuyển từ lõm sang lồi."
+            },
+            {
+                question: "Nếu \\(X \\sim \\mathcal{N}(0,4)\\) thì \\(P(|X| < 2)\\) bằng:",
+                options: [
+                    "A. \\(\\Phi(1) - \\Phi(-1)\\)",
+                    "B. \\(\\Phi(2) - \\Phi(-2)\\)",
+                    "C. \\(\\Phi(0.5) - \\Phi(-0.5)\\)",
+                    "D. \\(\\Phi(1)\\)"
+                ],
+                correct: 0,
+                explanation: "Chuẩn hóa: \\(\\sigma = 2\\), \\(P(|X| < 2) = P(-2 < X < 2) = P(-1 < Z < 1) = \\Phi(1) - \\Phi(-1)\\)."
+            },
+            {
+                question: "Giá trị nào sau đây KHÔNG phải là tính chất của phân phối chuẩn?",
+                options: [
+                    "A. Đối xứng qua trung bình",
+                    "B. Có dạng hình chuông",
+                    "C. Luôn có giá trị không âm",
+                    "D. Trung bình bằng trung vị"
+                ],
+                correct: 2,
+                explanation: "Biến ngẫu nhiên chuẩn có thể nhận bất kỳ giá trị thực nào (âm hoặc dương). Tính 'luôn có giá trị không âm' là sai."
+            },
+            {
+                question: "Cho \\(Z \\sim \\mathcal{N}(0,1)\\). Tìm c sao cho \\(P(Z < c) = 0.8413\\):",
+                options: [
+                    "A. 0",
+                    "B. 0.5",
+                    "C. 1",
+                    "D. 2"
+                ],
+                correct: 2,
+                explanation: "Từ bảng phân phối chuẩn tắc, \\(\\Phi(1) \\approx 0.8413\\). Vậy \\(c = 1\\)."
+            },
+            {
+                question: "Phương sai của phân phối chuẩn \\(\\mathcal{N}(\\mu, \\sigma^2)\\) là:",
+                options: [
+                    "A. \\(\\mu\\)",
+                    "B. \\(\\sigma\\)",
+                    "C. \\(\\sigma^2\\)",
+                    "D. 1"
+                ],
+                correct: 2,
+                explanation: "Tham số thứ hai trong ký hiệu \\(\\mathcal{N}(\\mu, \\sigma^2)\\) chính là phương sai."
+            },
+            {
+                question: "Nếu \\(X \\sim \\mathcal{N}(100, 225)\\) thì độ lệch chuẩn của X là:",
+                options: [
+                    "A. 225",
+                    "B. 15",
+                    "C. 100",
+                    "D. 25"
+                ],
+                correct: 1,
+                explanation: "Phương sai là 225, vậy độ lệch chuẩn \\(\\sigma = \\sqrt{225} = 15\\)."
+            },
+            {
+                question: "Cho \\(X \\sim \\mathcal{N}(50,100)\\). Xác suất \\(P(30 < X < 70)\\) xấp xỉ:",
+                options: [
+                    "A. 0.6827",
+                    "B. 0.9545",
+                    "C. 0.9973",
+                    "D. 0.5"
+                ],
+                correct: 1,
+                explanation: "Khoảng (30,70) tương ứng với \\(\\mu \\pm 2\\sigma\\) vì \\(\\sigma = 10\\), \\(\\mu \\pm 20\\). Xác suất ≈ 0.9545."
+            },
+            {
+                question: "Phân phối chuẩn được khám phá bởi nhà toán học nào?",
+                options: [
+                    "A. Isaac Newton",
+                    "B. Carl Friedrich Gauss",
+                    "C. Pierre-Simon Laplace",
+                    "D. Thomas Bayes"
+                ],
+                correct: 1,
+                explanation: "Phân phối chuẩn còn được gọi là phân phối Gauss để vinh danh Carl Friedrich Gauss, người đã sử dụng nó trong nghiên cứu về sai số quan sát thiên văn."
+            }
+        ];
+
+        let userAnswers = new Array(questions.length).fill(null);
+        let score = 0;
+        let timeLeft = 1800; // 30 phút = 1800 giây
+        let timerInterval;
+
+        // Khởi tạo đồng hồ
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Hết giờ làm bài!");
+                    checkAllAnswers();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Hiển thị câu hỏi
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.id = `question-${index}`;
+
+                questionCard.innerHTML = `
+                    <div class="question-number">Câu ${index + 1}/${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options" id="options-${index}">
+                        ${q.options.map((opt, optIndex) => `
+                            <div class="option" onclick="selectOption(${index}, ${optIndex})" 
+                                 id="q${index}opt${optIndex}">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="feedback" id="feedback-${index}">
+                        <div class="explanation" id="explanation-${index}"></div>
+                    </div>
+                `;
+
+                container.appendChild(questionCard);
+            });
+
+            document.getElementById('total-questions').textContent = questions.length;
+            
+            // Kích hoạt MathJax để hiển thị công thức
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Chọn đáp án
+        function selectOption(questionIndex, optionIndex) {
+            // Kiểm tra nếu đã nộp bài thì không cho chọn
+            if (document.querySelector('.btn-primary').disabled) return;
+
+            userAnswers[questionIndex] = optionIndex;
+            
+            // Xóa class selected từ tất cả option của câu này
+            const options = document.querySelectorAll(`#options-${questionIndex} .option`);
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            // Thêm class selected cho option được chọn
+            document.getElementById(`q${questionIndex}opt${optionIndex}`).classList.add('selected');
+            
+            // Đánh dấu câu đã trả lời
+            document.getElementById(`question-${questionIndex}`).classList.add('answered');
+            
+            // Cập nhật progress bar
+            updateProgress();
+        }
+
+        // Cập nhật thanh tiến trình
+        function updateProgress() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            const progress = (answered / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        // Kiểm tra đáp án
+        function checkAllAnswers() {
+            // Vô hiệu hóa nút nộp bài để tránh nộp nhiều lần
+            const submitBtn = document.querySelector('.btn-primary');
+            if (submitBtn.disabled) return;
+            
+            submitBtn.disabled = true;
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            
+            questions.forEach((q, index) => {
+                const userAnswer = userAnswers[index];
+                const feedback = document.getElementById(`feedback-${index}`);
+                const explanation = document.getElementById(`explanation-${index}`);
+                const options = document.querySelectorAll(`#options-${index} .option`);
+                
+                // Xóa các class cũ
+                options.forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect', 'selected');
+                });
+                
+                if (userAnswer !== null) {
+                    // Đánh dấu đáp án đúng
+                    options[q.correct].classList.add('correct');
+                    
+                    if (userAnswer === q.correct) {
+                        correctCount++;
+                        options[userAnswer].classList.add('selected');
+                        feedback.className = 'feedback show correct-feedback';
+                    } else {
+                        options[userAnswer].classList.add('incorrect');
+                        options[userAnswer].classList.add('selected');
+                        feedback.className = 'feedback show incorrect-feedback';
+                    }
+                    
+                    explanation.innerHTML = `<strong>Giải thích:</strong> ${q.explanation}`;
+                } else {
+                    // Nếu chưa trả lời, chỉ hiện đáp án đúng
+                    options[q.correct].classList.add('correct');
+                    feedback.className = 'feedback show';
+                    explanation.innerHTML = `<strong>Đáp án đúng là ${String.fromCharCode(65 + q.correct)}.</strong> ${q.explanation}`;
+                }
+            });
+            
+            score = correctCount;
+            document.getElementById('score').textContent = score;
+            
+            // Kích hoạt MathJax lại sau khi cập nhật nội dung
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+            
+            // Hiển thị kết quả
+            showResult(correctCount);
+        }
+
+        // Hiển thị kết quả
+        function showResult(correctCount) {
+            const resultModal = document.getElementById('result-modal');
+            const resultScore = document.getElementById('result-score');
+            const resultMessage = document.getElementById('result-message');
+            
+            resultScore.textContent = `${correctCount}/${questions.length}`;
+            
+            const percentage = (correctCount / questions.length) * 100;
+            if (percentage >= 80) {
+                resultMessage.textContent = 'Xuất sắc! Bạn đã nắm rất vững kiến thức về phân phối chuẩn.';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = 'Khá tốt! Cần ôn tập thêm một số khái niệm.';
+            } else if (percentage >= 40) {
+                resultMessage.textContent = 'Trung bình. Hãy xem lại bài giảng và làm lại bài test.';
+            } else {
+                resultMessage.textContent = 'Cần cố gắng hơn. Bạn nên học lại lý thuyết phân phối chuẩn.';
+            }
+            
+            resultModal.classList.add('show');
+        }
+
+        function closeResult() {
+            document.getElementById('result-modal').classList.remove('show');
+        }
+
+        // Hiển thị đáp án
+        function showAnswers() {
+            if (!confirm('Bạn có chắc muốn xem đáp án? Điểm số sẽ không được tính.')) return;
+            
+            clearInterval(timerInterval);
+            
+            questions.forEach((q, index) => {
+                const options = document.querySelectorAll(`#options-${index} .option`);
+                const feedback = document.getElementById(`feedback-${index}`);
+                const explanation = document.getElementById(`explanation-${index}`);
+                
+                options.forEach(opt => {
+                    opt.classList.remove('selected', 'incorrect');
+                });
+                
+                // Đánh dấu đáp án đúng
+                options[q.correct].classList.add('correct');
+                
+                feedback.className = 'feedback show';
+                explanation.innerHTML = `<strong>Đáp án đúng là ${String.fromCharCode(65 + q.correct)}.</strong> ${q.explanation}`;
+            });
+            
+            document.querySelector('.btn-primary').disabled = true;
+            
+            // Kích hoạt MathJax lại
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Làm lại bài
+        function resetQuiz() {
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            document.getElementById('score').textContent = '0';
+            
+            clearInterval(timerInterval);
+            timeLeft = 1800;
+            updateTimerDisplay();
+            startTimer();
+            
+            document.querySelector('.btn-primary').disabled = false;
+            
+            // Xóa tất cả feedback và class
+            questions.forEach((_, index) => {
+                const questionCard = document.getElementById(`question-${index}`);
+                questionCard.classList.remove('answered');
+                
+                const options = document.querySelectorAll(`#options-${index} .option`);
+                options.forEach(opt => {
+                    opt.classList.remove('selected', 'correct', 'incorrect');
+                });
+                
+                const feedback = document.getElementById(`feedback-${index}`);
+                feedback.className = 'feedback';
+                feedback.innerHTML = '<div class="explanation" id="explanation-' + index + '"></div>';
+            });
+            
+            updateProgress();
+            closeResult();
+            
+            // Kích hoạt MathJax lại
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Khởi tạo trang
+        renderQuestions();
+        startTimer();
+    </script>
+</body>
+</html>
